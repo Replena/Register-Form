@@ -1,165 +1,165 @@
 import {
-  Box,
   Button,
-  Checkbox,
-  FormControlLabel,
-  Link,
+  Container,
   TextField,
   Typography,
-  Card,
-  Divider,
-  CssBaseline,
+  Link,
+  Checkbox,
+  FormControlLabel,
+  Grid2,
+  Box,
 } from "@mui/material";
-import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import axios from "axios";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function SignIn(props) {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
-  const [open, setOpen] = React.useState(false);
+export default function SignIn() {
+  const { register, handleSubmit, control } = useForm({
+    mode: "onBlur",
+    defaultValues: {
+      rememberMe: false,
+    },
+  });
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const navigate = useNavigate();
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const onSubmit = async (data) => {
+    console.log("Form Data:", data);
 
-  const validateInputs = (data) => {
-    const email = data.get("email");
-    const password = data.get("password");
+    try {
+      const response = await axios.post("https://reqres.in/api/users?page=2");
+      const users = response.data.data;
 
-    let isValid = true;
+      const user = users.find((user) => user.email === data.email);
 
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
-    }
-
-    if (!password || password.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
-
-    return isValid;
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-
-    if (validateInputs(data)) {
-      console.log({
-        email: data.get("email"),
-        password: data.get("password"),
-      });
+      if (user) {
+        navigate("/home");
+        toast.success("Successfully signed in!");
+      } else {
+        toast.error("Invalid email or password");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("An error occurred. Please try again.");
     }
   };
 
   return (
-    <>
-      <CssBaseline enableColorScheme />
-      <Box direction="column" justifyContent="space-between">
-        <Card variant="outlined" sx={{ padding: "30px" }}>
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-          >
-            Sign in
-          </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              gap: 2,
-            }}
-          >
-            <TextField
-              error={emailError}
-              helperText={emailErrorMessage}
-              id="email"
-              type="email"
-              name="email"
-              placeholder="your@email.com"
-              autoComplete="email"
-              autoFocus
-              required
-              fullWidth
-              variant="outlined"
-              color={emailError ? "error" : "primary"}
-            />
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              <Link
-                component="button"
-                onClick={handleClickOpen}
-                variant="body2"
-                sx={{ alignSelf: "baseline" }}
-              >
-                Forgot your password?
-              </Link>
-            </Box>
-            <TextField
-              error={passwordError}
-              helperText={passwordErrorMessage}
-              name="password"
-              placeholder="••••••"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              required
-              fullWidth
-              variant="outlined"
-              color={passwordError ? "error" : "primary"}
-            />
+    <Container
+      component="main"
+      maxWidth="xs"
+      sx={{
+        backgroundColor: "white",
+        padding: 3,
+        borderRadius: 2,
+        color: "text.primary",
+        opacity: 0.9,
+      }}
+    >
+      <Typography component="h1" variant="h4" align="center">
+        Sign in
+      </Typography>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <TextField
+          variant="outlined"
+          required
+          fullWidth
+          id="email"
+          label="Email Address"
+          name="email"
+          autoComplete="email"
+          margin="normal"
+          {...register("email")}
+          sx={{ backgroundColor: "white" }}
+        />
+        <TextField
+          variant="outlined"
+          required
+          fullWidth
+          name="password"
+          label="Password"
+          type="password"
+          id="password"
+          autoComplete="current-password"
+          margin="normal"
+          {...register("password")}
+        />
 
-            <Button type="submit" fullWidth variant="contained">
-              Sign in
-            </Button>
-            <Typography sx={{ textAlign: "center" }}>
-              Don't have an account?{" "}
-              <Link href="/signup" variant="body2">
-                Sign up
-              </Link>
-            </Typography>
-          </Box>
-          <Divider>or</Divider>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Controller
+          name="rememberMe"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Checkbox {...field} color="primary" />}
+              label="Remember me"
+              sx={{ mt: 1 }}
+            />
+          )}
+        />
+
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          color="primary"
+          sx={{ mt: 2, mb: 2 }}
+        >
+          Sign In
+        </Button>
+
+        <Grid2 spacing={2}>
+          <Grid2 xs={12} sm={6}>
+            <Box display="flex" justifyContent="center">
+              <Button
+                fullWidth
+                variant="outlined"
+                color="primary"
+                sx={{ minWidth: 250, margin: "0 auto" }}
+              >
+                Sign in with Facebook
+              </Button>
+            </Box>
+          </Grid2>
+          <Grid2 xs={12} sm={6}>
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert("Sign in with Google")}
+              color="error"
+              sx={{ minWidth: 250, margin: "0 auto" }}
             >
               Sign in with Google
             </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert("Sign in with Facebook")}
-            >
-              Sign in with Facebook
-            </Button>
-          </Box>
-        </Card>
-      </Box>
-    </>
+          </Grid2>
+        </Grid2>
+
+        <Link
+          component={RouterLink}
+          to="/signUp"
+          variant="body2"
+          display="block"
+          textAlign="right"
+          mt={2}
+          color="text.secondary"
+          underline="none"
+        >
+          Don't have an account? Sign up
+        </Link>
+
+        <Link
+          component={RouterLink}
+          to="/forgetPassword"
+          variant="body2"
+          display="block"
+          textAlign="right"
+          mt={2}
+          color="text.secondary"
+          underline="none"
+        >
+          Forgot your password?
+        </Link>
+      </form>
+    </Container>
   );
 }

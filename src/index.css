@@ -28,6 +28,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-image: url("../public/pexels-steve-1509534.jpg");
 }
 
 h1 {
